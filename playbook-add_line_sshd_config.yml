@@ -1,0 +1,44 @@
+---
+- hosts: 
+  gather_facts: yes
+  become: yes
+  tasks:
+  - name: Setting newest ciphers
+    lineinfile:
+      state: present
+      path: /etc/ssh/sshd_config
+      line: 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr'
+    notify:
+      - restart and test
+
+  - name: Setting newest macs
+    lineinfile:
+      state: present
+      path: /etc/ssh/sshd_config
+      line: 'Macs hmac-sha2-256,hmac-sha2-512'
+    notify:
+      - restart and test
+
+#  This KexAlgorithm option is not supported in the Solaris 10 sshd_config
+#  It is however supported in the Solaris 11 config so apply only on Solaris 11
+#  If you do apply to Solaris 10 sshd will fail to restart as this is a unknown option and syntax error
+
+  - name: Setting kex algorithums
+    lineinfile:
+      state: present
+      path: /etc/ssh/sshd_config
+      line: 'KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256'
+    notify:
+      - restart and test
+    when: ansible_kernel==5.11
+
+  - name: Set permission of 640 on /etc/ssh/sshd_config - remove other read
+    file: path=/etc/ssh/sshd_config state=file owner=root group=sys mode=0640
+
+  handlers:
+    - name: restart ssh
+      service: name=ssh enabled=yes state=reloaded
+      listen: restart and test
+    - name: ping test
+      ping:
+      listen: restart and test
