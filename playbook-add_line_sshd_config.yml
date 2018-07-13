@@ -1,5 +1,6 @@
 ---
-- gather_facts: yes
+- hosts:
+  gather_facts: yes
   become: yes
   tasks:
   - name: Setting newest ciphers
