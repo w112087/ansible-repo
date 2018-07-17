@@ -1,0 +1,26 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+  - name: Setting yum proxy configuration
+    when: ansible_distribution == "RedHat" and ansible_distribution_version > "5" # Check the host is Redhat 5 and above
+    lineinfile:
+      state: present
+      path: /etc/yum.conf
+      line: 'proxy=http://192.168.1.33:3128'
+
+  - name: Checking that YUM works
+    yum:
+      list: repo
+    register: yro
+    when: ansible_distribution == "RedHat" and ansible_distribution_version > "5" # Check the host is Redhat 5 and above
+
+  - name: Getting yum yro
+    debug: msg=" Yum configured as follows {{ yro }}"
+
+  - name: Upgrade all packages
+    when: ansible_distribution == "RedHat" and ansible_distribution_version > "5" # Check the host is Redhat 5 and above
+    yum:
+      name: '*'
+      state: latest
