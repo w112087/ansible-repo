@@ -1,0 +1,23 @@
+---
+- hosts: all
+  serial: 1
+  become: yes
+  gather_facts: yes
+  ignore_errors: true
+  vars:
+    bmc_server: 127.0.0.1
+    rt_server1: 127.0.0.1
+    rt_server2: 127.0.0.1
+    av_server1: 127.0.0.1
+    av_server2: 127.0.0.1
+    av_lua_server: 127.0.0.1
+    yum_server: 127.0.0.1
+    http_port: 80
+    https_port: 443
+    
+  tasks:
+  - name: Try and find SERVER in bp.conf
+    command: "awk '$0~/^SERVER =/ {print$3}' /usr/openv/netbackup/bp.conf"
+    register: server
+   
+  - name: Check Netbackup connectivity to SERVER
