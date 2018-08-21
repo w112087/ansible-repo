@@ -20,7 +20,7 @@
     command: "awk '$0~/^SERVER =/ {print$3}' /usr/openv/netbackup/bp.conf"
     register: server
    
-  - name: Check Netbackup connectivity to SERVER
+  - name: Check Netbackup connectivity to SERVER port 1556
     wait_for: 
       host: "{{ item }}"
       port: 1556
