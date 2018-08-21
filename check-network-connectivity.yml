@@ -21,3 +21,54 @@
     register: server
    
   - name: Check Netbackup connectivity to SERVER
+    wait_for: 
+      host: "{{ item }}"
+      port: 1556
+      timeout: 2
+    with_items: "{{ server.stdout_lines }}"
+
+  - name: Check BMC connectivity to "{{ bmc_server }}" port "{{ http_port }}"
+    wait_for: 
+      host: "{{ bmc_server }}"
+      port: "{{ http_port }}"
+      timeout: 2
+
+  - name: Check BMC rt server connectivity to "{{ rt_server1 }}" port 2059
+    wait_for: 
+      host:  "{{ rt_server1 }}"
+      port: 2059
+      timeout: 2
+
+  - name: Check BMC rt server connectivity to "{{ rt_server2 }}" port 2059
+    wait_for: 
+      host: "{{ rt_server2 }}"
+      port: 2059
+      timeout: 2
+
+  - name: Check SEP AV server connectivity to "{{ av_server1 }}" port "{{ https_port }}" REDHAT ONLY
+    when: ansible_os_family == "RedHat"
+    wait_for: 
+      host: "{{ av_server1 }}"
+      port: "{{ https_port }}"
+      timeout: 2
+
+  - name: Check SEP AV server connectivity to "{{ av_server2 }}" port "{{ https_port }}" REDHAT ONLY
+    when: ansible_os_family == "RedHat"
+    wait_for: 
+      host: "{{ av_server2 }}"
+      port: "{{ https_port }}"
+      timeout: 2
+
+  - name: Check SEP AV  LUA server connectivity to "{{ av_lua_server }}" port 7070 REDHAT ONLY
+    when: ansible_os_family == "RedHat"
+    wait_for: 
+      host: "{{ av_lua_server }}"
+      port: 7070
+      timeout: 2
+
+  - name: Check YUM server connectivity to "{{ yum_server }}" port "{{ http_port }}" REDHAT ONLY
+    when: ansible_os_family == "RedHat"
+    wait_for: 
+      host: "{{ yum_server }}"
+      port: "{{ http_port }}"
+      timeout: 2
