@@ -15,7 +15,7 @@
     lineinfile:
       state: present
       path: /etc/yum.conf
-      line: 'exclude=java*'
+      line: 'exclude=java* firefox*'
 
   - name: Checking that YUM works
     yum:
