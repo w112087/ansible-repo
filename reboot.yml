@@ -1,0 +1,4 @@
+---
+  hosts: all
+  - name: Unconditionally reboot host with defaults
+    reboot:
