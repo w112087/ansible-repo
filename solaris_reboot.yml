@@ -4,7 +4,7 @@
   become: yes
   tasks:
     - name: Rebooting Solaris
-        shell: "sleep 5 && /usr/sbin/shutdown -y -g0 -i6 "Rebooted by ansible""
+        shell: "sleep 5 && /usr/sbin/shutdown -y -g0 -i6"
         async: 1
         poll: 0
 
