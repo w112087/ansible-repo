@@ -9,8 +9,8 @@
       poll: 0
 
     - name: wait for Solaris system to reboot
-        wait_for_connection:
-          connection_timeout: 40
-          sleep: 5
-          delay: 5
-          timeout: 120
+      wait_for_connection:
+        connection_timeout: 40
+        sleep: 5
+        delay: 5
+        timeout: 120
