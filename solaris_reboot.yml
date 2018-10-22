@@ -5,8 +5,8 @@
   tasks:
     - name: Rebooting Solaris
       shell: "sleep 5 && /usr/sbin/shutdown -y -g0 -i6"
-        async: 1
-        poll: 0
+      async: 1
+      poll: 0
 
     - name: wait for Solaris system to reboot
         wait_for_connection:
