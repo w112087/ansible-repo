@@ -3,7 +3,7 @@
   #serial: 1
   gather_facts: yes
   become: yes
-  ignore_errors: 1
+  #ignore_errors: 1
   vars:
     nfs_server_ip: 192.168.1.1
     nfs_server_port: 2049
