@@ -1,0 +1,101 @@
+---
+- hosts: all
+  #serial: 1
+  gather_facts: yes
+  become: yes
+  ignore_errors: 1
+  vars:
+    nfs_server_ip: 192.168.1.1
+    nfs_server_port: 2049
+    patch_share: /export/install/patches
+    build_patched: build_patched_{{ ansible_date_time.date }}
+
+  tasks:
+  - name: Check server has Live Upgrade is properly initialized
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/lucurr
+    changed_when: false
+
+  - name: Check servers current Live update status
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/lustatus
+    register: lustatus
+
+  - name: Listing current lustatus
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    debug: msg="{{ lustatus.stdout_lines }}"
+
+  - name: Checking connectivity to nfs server "{{ nfs_server_ip }}" on port "{{ nfs_server_port }}"
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    wait_for:
+      host: "{{ nfs_server_ip }}"
+      port: "{{ nfs_server_port }}"
+      timeout: 2
+
+  - name: Check NFS client can see something on NFS server
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/showmount -e "{{ nfs_server_ip }}"
+    register: nfs_shares
+
+  - name: Listing nfs shares on nfs server "{{ nfs_server_ip }}"
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    debug: msg="{{ nfs_shares.stdout_lines }}"
+
+  - name: Create a directory if it doesn't exist to mount the nfs share on
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    file:
+      path: /ansible_patching
+      state: directory
+      mode: 0755
+
+  - name: Mount NFS share
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/mount -F nfs "{{ nfs_server_ip }}":"{{ patch_share }}" /ansible_patching
+      warn=False
+
+  - name: Installing prereq patches from patch cluster
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /ansible_patching/10_Recommended/installcluster --apply-prereq --s10patchset >> /root/prereq.log
+
+  - name: Create Alternate BE
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/lucreate -n {{ build_patched }}
+    
+  - name: Remove any alternate directorys left hanging about
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    file:
+      path: /.alt.{{ build_patched }}
+      state: absent
+
+  - name: Remove any alternate directorys left hanging about
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    file:
+      path: /.alt.build
+      state: absent
+
+  - name: Apply patch Cluster to new live update
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /ansible_patching/10_Recommended/installcluster -d -B {{ build_patched }} --s10patchset >> /root/apply_patches.log
+
+  - name: Activate alternate BE
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/luactivate {{ build_patched }}
+
+  - name: Check servers current Live update status
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/lustatus
+    register: lustatus
+
+  - name: Listing current lustatus after patching
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    debug: msg="{{ lustatus.stdout_lines }}"
+
+  - name: Unmount NFS share
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    shell: /usr/sbin/umount /ansible_patching
+
+  - name: Remove the directory used to mount the nfs share on
+    when: ansible_os_family == 'Solaris' and ansible_distribution_version == '10'
+    file:
+      path: /ansible_patching
+      state: absent
