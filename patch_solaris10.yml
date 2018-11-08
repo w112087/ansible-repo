@@ -101,4 +101,4 @@
       state: absent
       
   - name: Next steps
-    debug: msg="The final step is to either manual restart {{ ansible_hostname }} with \"shutdown -y -g0 -i6\" or restart via ansible"
+    debug: msg="The final step is to either manual restart {{ ansible_hostname }} with "shutdown -y -g0 -i6" or restart via ansible"
