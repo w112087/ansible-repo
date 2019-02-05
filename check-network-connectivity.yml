@@ -21,7 +21,8 @@
     register: server
    
   - name: Check Netbackup connectivity to SERVER port 1556
-    wait_for: 
+
+wait_for: 
       host: "{{ item }}"
       port: 1556
       timeout: 2
@@ -72,3 +73,10 @@
       host: "{{ yum_server }}"
       port: "{{ http_port }}"
       timeout: 2
+
+  - name: Check default gateway {{ ansible_default_ipv4.gateway }} is pingable from host {{ ansible_hostname }}
+    command: ping -c 1 {{ ansible_default_ipv4.gateway }}
+    register: pingout
+
+  - name: Ping output from 1 icmp ping
+    debug: msg="{{ pingout.stdout_lines }}"
